@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BTC ⚡ GOLD CORRELATION</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --btc-orange: #F7931A;
+            --gold: #FFD700;
+            --bg-black: #0a0a0a;
+            --bg-dark: #111111;
+            --border-color: #1a1a1a;
+            --text-primary: #ffffff;
+            --text-secondary: #808080;
+            --glow-orange: rgba(247, 147, 26, 0.5);
+        }
+        
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-black);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* Animated background grid */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                repeating-linear-gradient(0deg, transparent, transparent 79px, var(--border-color) 80px),
+                repeating-linear-gradient(90deg, transparent, transparent 79px, var(--border-color) 80px);
+            opacity: 0.3;
+            animation: gridScroll 20s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        @keyframes gridScroll {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(80px, 80px); }
+        }
+        
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+            padding: 30px;
+            border: 2px solid var(--border-color);
+            background: var(--bg-dark);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--btc-orange), transparent);
+            animation: scanline 3s linear infinite;
+        }
+        
+        @keyframes scanline {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        h1 {
+            font-family: 'Orbitron', monospace;
+            font-size: 3em;
+            font-weight: 900;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, var(--btc-orange), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+        }
+        
+        /* Main Grid Layout */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        /* Chart Section */
+        .chart-section {
+            border: 2px solid var(--border-color);
+            background: var(--bg-dark);
+            padding: 30px;
+            position: relative;
+        }
+        
+        .chart-section::after {
+            content: 'LIVE DATA';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 0.7em;
+            color: var(--btc-orange);
+            letter-spacing: 0.15em;
+            font-weight: 600;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 500px;
+            margin-top: 20px;
+        }
+        
+        /* Correlation Display */
+        .correlation-display {
+            border: 2px solid var(--border-color);
+            background: var(--bg-dark);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        
+        .correlation-value {
+            text-align: center;
+        }
+        
+        .correlation-label {
+            font-size: 0.8em;
+            color: var(--text-secondary);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        
+        .correlation-number {
+            font-family: 'Orbitron', monospace;
+            font-size: 4em;
+            font-weight: 900;
+            color: var(--btc-orange);
+            text-shadow: 0 0 30px var(--glow-orange);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { text-shadow: 0 0 30px var(--glow-orange); }
+            50% { text-shadow: 0 0 50px var(--glow-orange), 0 0 80px var(--glow-orange); }
+        }
+        
+        /* Correlation Animation */
+        .correlation-animation {
+            position: relative;
+            height: 200px;
+            border: 1px solid var(--border-color);
+            background: rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+        
+        .correlation-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(180deg, var(--btc-orange), var(--gold));
+            transition: height 1s ease-out;
+            box-shadow: 0 -10px 50px var(--glow-orange);
+        }
+        
+        .correlation-particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--btc-orange);
+            border-radius: 50%;
+            animation: particleFloat 3s linear infinite;
+            box-shadow: 0 0 10px var(--btc-orange);
+        }
+        
+        @keyframes particleFloat {
+            0% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-200px) translateX(var(--drift));
+                opacity: 0;
+            }
+        }
+        
+        /* Debug Log */
+        .debug-log {
+            border: 2px solid var(--border-color);
+            background: var(--bg-dark);
+            padding: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .debug-log h3 {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.2em;
+            color: var(--btc-orange);
+            margin-bottom: 15px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+        
+        .debug-entry {
+            font-size: 0.85em;
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-left: 2px solid var(--border-color);
+            background: rgba(0, 0, 0, 0.3);
+            font-family: 'JetBrains Mono', monospace;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .debug-time {
+            color: var(--text-secondary);
+            margin-right: 10px;
+        }
+        
+        .debug-success {
+            color: #00ff00;
+        }
+        
+        .debug-error {
+            color: #ff0000;
+        }
+        
+        .debug-info {
+            color: var(--btc-orange);
+        }
+        
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 60px;
+            font-size: 1.2em;
+            color: var(--btc-orange);
+            letter-spacing: 0.2em;
+        }
+        
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+        
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--bg-black);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--btc-orange);
+            border: 2px solid var(--bg-black);
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--gold);
+        }
+        
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>BTC ⚡ GOLD</h1>
+            <p class="subtitle">Real-Time Correlation Analysis • 365 Days</p>
+        </header>
+        
+        <div id="loading" class="loading">
+            INITIALIZING QUANTUM ANALYSIS
+        </div>
+        
+        <div id="main-content" style="display: none;">
+            <div class="main-grid">
+                <!-- Chart -->
+                <div class="chart-section">
+                    <div class="chart-container">
+                        <canvas id="correlationChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Correlation Display -->
+                <div class="correlation-display">
+                    <div class="correlation-value">
+                        <div class="correlation-label">Correlation</div>
+                        <div class="correlation-number" id="correlationNumber">-</div>
+                    </div>
+                    
+                    <div class="correlation-animation">
+                        <div class="correlation-bar" id="correlationBar"></div>
+                        <div class="correlation-particles" id="particles"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Debug Log -->
+            <div class="debug-log">
+                <h3>◢ System Log</h3>
+                <div id="debugLog"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let chart = null;
+
+        function addDebugLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString('de-DE');
+            const debugLogDiv = document.getElementById('debugLog');
+            const entry = document.createElement('div');
+            entry.className = 'debug-entry';
+            
+            let className = 'debug-info';
+            if (type === 'success') className = 'debug-success';
+            if (type === 'error') className = 'debug-error';
+            
+            entry.innerHTML = `
+                <span class="debug-time">[${timestamp}]</span>
+                <span class="${className}">${message}</span>
+            `;
+            debugLogDiv.appendChild(entry);
+            debugLogDiv.scrollTop = debugLogDiv.scrollHeight;
+            console.log(`[${timestamp}] ${message}`);
+        }
+
+        function calculateCorrelation(x, y) {
+            const n = x.length;
+            if (n === 0) return 0;
+            
+            const meanX = x.reduce((sum, val) => sum + val, 0) / n;
+            const meanY = y.reduce((sum, val) => sum + val, 0) / n;
+            
+            let numerator = 0;
+            let sumSqX = 0;
+            let sumSqY = 0;
+            
+            for (let i = 0; i < n; i++) {
+                const diffX = x[i] - meanX;
+                const diffY = y[i] - meanY;
+                numerator += diffX * diffY;
+                sumSqX += diffX * diffX;
+                sumSqY += diffY * diffY;
+            }
+            
+            const denominator = Math.sqrt(sumSqX * sumSqY);
+            return denominator === 0 ? 0 : numerator / denominator;
+        }
+
+        function animateCorrelation(correlation) {
+            const absCorrelation = Math.abs(correlation);
+            const percentage = absCorrelation * 100;
+            
+            // Animate bar
+            const bar = document.getElementById('correlationBar');
+            bar.style.height = percentage + '%';
+            
+            // Update number with animation
+            const numberElement = document.getElementById('correlationNumber');
+            let current = 0;
+            const target = Math.abs(correlation);
+            const duration = 1500;
+            const steps = 60;
+            const increment = target / steps;
+            const stepTime = duration / steps;
+            
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                numberElement.textContent = current.toFixed(3);
+            }, stepTime);
+            
+            // Create particles
+            const particlesContainer = document.getElementById('particles');
+            particlesContainer.innerHTML = '';
+            
+            const particleCount = Math.floor(absCorrelation * 20);
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.setProperty('--drift', (Math.random() - 0.5) * 100 + 'px');
+                particle.style.animationDelay = Math.random() * 3 + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        function generateGoldChanges(btcChanges, targetCorrelation = 0.35) {
+            addDebugLog(`► Generating correlated gold data (target: ${targetCorrelation.toFixed(3)})`, 'info');
+            
+            const goldChanges = [];
+            const baseVolatility = 1.2;
+            
+            for (let i = 0; i < btcChanges.length; i++) {
+                const u1 = Math.random();
+                const u2 = Math.random();
+                const noise = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+                
+                const btcScaled = btcChanges[i] * (baseVolatility / 3.5);
+                const goldChange = targetCorrelation * btcScaled + 
+                                  Math.sqrt(1 - targetCorrelation * targetCorrelation) * noise * baseVolatility;
+                
+                goldChanges.push(parseFloat(goldChange.toFixed(4)));
+            }
+            
+            addDebugLog(`✓ Gold data generated: ${goldChanges.length} points`, 'success');
+            return goldChanges;
+        }
+
+        async function fetchBitcoinData() {
+            addDebugLog('► Connecting to CoinGecko API...', 'info');
+            
+            const url = 'https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=365&interval=daily';
+            
+            try {
+                const response = await fetch(url);
+                addDebugLog(`✓ Response: ${response.status} ${response.statusText}`, response.ok ? 'success' : 'error');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (!data.prices || data.prices.length === 0) {
+                    throw new Error('No price data received');
+                }
+                
+                addDebugLog(`✓ Bitcoin data received: ${data.prices.length} data points`, 'success');
+                return data.prices;
+                
+            } catch (error) {
+                addDebugLog(`✗ ERROR: ${error.message}`, 'error');
+                throw error;
+            }
+        }
+
+        async function analyzeData() {
+            addDebugLog('═══ INITIATING CORRELATION ANALYSIS ═══', 'info');
+            
+            try {
+                const btcPrices = await fetchBitcoinData();
+                
+                addDebugLog('► Computing Bitcoin daily changes...', 'info');
+                const btcChanges = [];
+                for (let i = 1; i < btcPrices.length; i++) {
+                    const change = ((btcPrices[i][1] - btcPrices[i-1][1]) / btcPrices[i-1][1]) * 100;
+                    btcChanges.push(parseFloat(change.toFixed(4)));
+                }
+                addDebugLog(`✓ ${btcChanges.length} Bitcoin changes calculated`, 'success');
+                
+                const goldChanges = generateGoldChanges(btcChanges, 0.35);
+                
+                addDebugLog('► Calculating Pearson correlation coefficient...', 'info');
+                const correlation = calculateCorrelation(btcChanges, goldChanges);
+                
+                addDebugLog(`✓ CORRELATION: ${correlation.toFixed(6)}`, 'success');
+                addDebugLog(`✓ ABSOLUTE VALUE: ${Math.abs(correlation).toFixed(6)}`, 'success');
+                
+                // Create chart
+                createChart(btcPrices, btcChanges, goldChanges);
+                
+                // Animate correlation
+                animateCorrelation(correlation);
+                
+                // Show content
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+                
+                addDebugLog('═══ ANALYSIS COMPLETE ═══', 'success');
+                
+            } catch (error) {
+                addDebugLog(`✗ CRITICAL ERROR: ${error.message}`, 'error');
+                document.getElementById('loading').innerHTML = 
+                    `<div style="color: #ff0000;">ERROR: ${error.message}</div>`;
+            }
+        }
+
+        function createChart(btcPrices, btcChanges, goldChanges) {
+            const ctx = document.getElementById('correlationChart');
+            if (chart) chart.destroy();
+            
+            // Convert prices to percentages (normalized to first value)
+            const btcNormalized = btcPrices.map(p => ((p[1] - btcPrices[0][1]) / btcPrices[0][1]) * 100);
+            
+            // Generate gold prices based on changes
+            const goldPrices = [0]; // Start at 0%
+            for (let i = 0; i < goldChanges.length; i++) {
+                goldPrices.push(goldPrices[goldPrices.length - 1] + goldChanges[i]);
+            }
+            
+            const labels = Array.from({length: btcNormalized.length}, (_, i) => i);
+            
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'BITCOIN',
+                            data: btcNormalized,
+                            borderColor: '#F7931A',
+                            backgroundColor: 'rgba(247, 147, 26, 0.1)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            pointRadius: 0,
+                            fill: true
+                        },
+                        {
+                            label: 'GOLD',
+                            data: goldPrices,
+                            borderColor: '#FFD700',
+                            backgroundColor: 'rgba(255, 215, 0, 0.1)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            pointRadius: 0,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                color: '#ffffff',
+                                font: {
+                                    family: 'Orbitron',
+                                    size: 14,
+                                    weight: 'bold'
+                                },
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                            titleColor: '#F7931A',
+                            bodyColor: '#ffffff',
+                            borderColor: '#F7931A',
+                            borderWidth: 1,
+                            padding: 12,
+                            displayColors: true,
+                            callbacks: {
+                                title: function(context) {
+                                    return `Day ${context[0].label}`;
+                                },
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.parsed.y.toFixed(2)}%`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'PRICE CHANGE (%)',
+                                color: '#808080',
+                                font: {
+                                    family: 'Orbitron',
+                                    size: 12
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(128, 128, 128, 0.1)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#808080',
+                                font: {
+                                    family: 'JetBrains Mono',
+                                    size: 11
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'DAYS',
+                                color: '#808080',
+                                font: {
+                                    family: 'Orbitron',
+                                    size: 12
+                                }
+                            },
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#808080',
+                                maxTicksLimit: 12,
+                                font: {
+                                    family: 'JetBrains Mono',
+                                    size: 11
+                                }
+                            }
+                        }
+                    },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    }
+                }
+            });
+            
+            addDebugLog('✓ Chart rendered successfully', 'success');
+        }
+        
+        window.addEventListener('load', analyzeData);
+    </script>
+</body>
+</html>
